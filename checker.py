@@ -1,5 +1,4 @@
 import boto3
-from slackclient import SlackClient
 from dateutil.tz import tzutc
 import datetime
 
@@ -10,8 +9,8 @@ accounts_list = {
 	}
 
 
-token = 'slack_token'
-sc = SlackClient(token)
+bot_token = 'bot_token'
+chatID = 'chatID'
 
 def get_keys(arn):
 	session = boto3.Session() 
@@ -54,9 +53,10 @@ def check_events(event, context):
 						instance = ''
 
 					message = ("Account: %s\n Instance: %s (%s, %s)\n Event: %s\n Time: %s - %s")%(key, instance, status['InstanceId'], status['AvailabilityZone'], status['Events'][0]['Description'], status['Events'][0]['NotBefore'].strftime('%H:%M, %d %b, %Y'), status['Events'][0]['NotAfter'].strftime('%H:%M, %d %b, %Y'))
-					sc.api_call("chat.postMessage", channel="aws_instances_status", text=message, username='awsEventBot')
+					
+					send_text = 'https://api.telegram.org/bot' + bot_token + '/sendMessage?chat_id=' + chatID + '&parse_mode=Markdown&text=' + message
 
-
+					response = requests.get(send_text)
 				except Exception as e:
 					pass
 					#print("get events error:", str(e))
